@@ -65,10 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 filledDot.classList.add('filled-dot');
                 filledDot.setAttribute('draggable', true);
                 filledDot.addEventListener('dragstart', handleDragStart);
+                filledDot.addEventListener('touchstart', handleTouchStart);
                 dotContainer.appendChild(filledDot);
             }
             dotContainer.addEventListener('dragover', handleDragOver);
             dotContainer.addEventListener('drop', handleDrop);
+            dotContainer.addEventListener('touchmove', handleTouchMove);
+            dotContainer.addEventListener('touchend', handleTouchEnd);
             tenFrame.appendChild(dotContainer);
         }
 
@@ -96,6 +99,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 sourceTenFrame.classList.remove('dragging-from');
 
                 checkTenFrameComplete(sourceTenFrame, event.target.closest('.ten-frame'));
+            }
+        }
+    }
+
+    function handleTouchStart(event) {
+        const touch = event.touches[0];
+        const dot = event.target;
+        dot.classList.add('dragging');
+        dot.closest('.ten-frame').classList.add('dragging-from');
+        dot.style.position = 'absolute';
+        dot.style.left = `${touch.clientX - dot.offsetWidth / 2}px`;
+        dot.style.top = `${touch.clientY - dot.offsetHeight / 2}px`;
+    }
+
+    function handleTouchMove(event) {
+        event.preventDefault();
+        const touch = event.touches[0];
+        const dot = document.querySelector('.dragging');
+        if (dot) {
+            dot.style.left = `${touch.clientX - dot.offsetWidth / 2}px`;
+            dot.style.top = `${touch.clientY - dot.offsetHeight / 2}px`;
+        }
+    }
+
+    function handleTouchEnd(event) {
+        const dot = document.querySelector('.dragging');
+        if (dot) {
+            const touch = event.changedTouches[0];
+            dot.style.position = 'relative';
+            dot.style.left = '0';
+            dot.style.top = '0';
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            const sourceTenFrame = document.querySelector('.dragging-from');
+            if (target && target.classList.contains('dot') && !target.querySelector('.filled-dot')) {
+                target.appendChild(dot);
+                dot.classList.remove('dragging');
+                sourceTenFrame.classList.remove('dragging-from');
+
+                checkTenFrameComplete(sourceTenFrame, target.closest('.ten-frame'));
+            } else {
+                dot.classList.remove('dragging');
+                sourceTenFrame.classList.remove('dragging-from');
             }
         }
     }
