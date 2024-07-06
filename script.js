@@ -65,12 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 filledDot.classList.add('filled-dot');
                 filledDot.setAttribute('draggable', true);
                 filledDot.addEventListener('dragstart', handleDragStart);
-                filledDot.addEventListener('touchstart', handleTouchStart);
+                filledDot.addEventListener('touchstart', handleTouchStart, { passive: false });
                 dotContainer.appendChild(filledDot);
             }
             dotContainer.addEventListener('dragover', handleDragOver);
             dotContainer.addEventListener('drop', handleDrop);
-            dotContainer.addEventListener('touchmove', handleTouchMove);
+            dotContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
             dotContainer.addEventListener('touchend', handleTouchEnd);
             tenFrame.appendChild(dotContainer);
         }
@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleTouchStart(event) {
+        event.preventDefault();
         const touch = event.touches[0];
         const dot = event.target;
         dot.classList.add('dragging');
@@ -119,13 +120,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function onTouchMove(event) {
+            event.preventDefault();
             const touch = event.touches[0];
             moveAt(touch.pageX, touch.pageY, dot);
         }
 
-        document.addEventListener('touchmove', onTouchMove);
+        document.addEventListener('touchmove', onTouchMove, { passive: false });
 
-        dot.ontouchend = function () {
+        dot.ontouchend = function (event) {
             document.removeEventListener('touchmove', onTouchMove);
             dot.classList.remove('dragging');
             dot.style.position = 'relative';
